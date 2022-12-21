@@ -1,0 +1,8 @@
+names:
+- blue_dubu
+- big_blue_dubu
+- small_blue_dubu
+- small_brown_dubu
+nc: 4
+train: /home/ubuntu/_SPACE/_dataset/poly_dataset/train.txt
+val: /home/ubuntu/_SPACE/_dataset/poly_dataset/val.txt
