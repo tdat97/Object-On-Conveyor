@@ -1,1 +1,0 @@
-Please run "python setup.py install" in shell to install cuda extension "polygon_inter_union_cuda"

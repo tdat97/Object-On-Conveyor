@@ -1,57 +1,37 @@
-from utils.camera import SentechCam
 from utils.logger import logger
-from utils import tool
+from utils.text import *
+from utils import tool, device
 from PIL import ImageTk, Image
 import serial
+import numpy as np
+import time
 
+from tkinter import PhotoImage
 
-# Load Devices#########################################################
-EXPOSURE_TIME = 2500
-SERIAL_PORT = "COM1"
-
-def get_cam(self, exposure_time):
-    try:
-        cam = SentechCam(logger=logger, ExposureTime=exposure_time)
-        for _ in range(3): cam.get_image()
-        
-        self.cam = cam
+def device_check(self):
+    # Load Cam
+    # self.cam, err = get_cam(EXPOSURE_TIME, logger=logger)
+    self.cam, err = device.get_cam2()
+    if self.cam:
         logger.info("Cam Started.")
-        self.write_sys_msg("Cam Started")
-    except Exception as e:
-        logger.error(e)
-        self.write_sys_msg(e)
-        self.stop_signal = True
+        self.write_sys_msg("Cam Started.")
 
-def get_serial(self, port):
-    try:
-        my_serial = serial.Serial(port, 9600, timeout=0, bytesize=serial.EIGHTBITS, 
-                                  stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_ODD)
+    # Load Serial
+    self.serial, err = device.get_serial(SERIAL_PORT, self.cam) if self.cam else (None, err)
+    if self.serial:
+        logger.info("Serial opened.")
+        self.write_sys_msg("Serial opened.")
         
-        time.sleep(1.2)
-        my_serial.write(b'r')
-        time.sleep(0.05)
-        if my_serial.read(1) == b'': 
-            raise Exception("Serial is unresponsive.")
-        
-        self.serial = my_serial
-        logger.info("Serial Opened.")
-        self.write_sys_msg("Serial Opened.")
-    except Exception as e:
-        logger.error(e)
-        self.write_sys_msg(e)
-        self.stop_signal = True
-
-def device_check(self)
-    while not self.stop_signal:
-        time.sleep(0.05)
-        if self.cam is not None and self.serial is not None:            
-            self.button1.configure(text="판독모드", command=self.read_mode)
-            self.button2.configure(text="촬영모드", command=self.snap_mode)
-            self.button3.configure(text="학습모드", command=self.train_mode)
-            break
+    # 에러가 있을 경우 출력
+    if err:
+        logger.error(err)
+        self.write_sys_msg(err)
 
     text = f"Cam state : {bool(self.cam)}   Serial state : {bool(self.serial)}"
     self.write_sys_msg(text)
+    
+    if self.cam is not None and self.serial is not None:
+        self.init_button_()
 
 # 실시간 이미지 조정####################################################
 def image_eater(self): # 쓰레드 # self.image_Q에 있는 이미지 출력
@@ -63,13 +43,19 @@ def image_eater(self): # 쓰레드 # self.image_Q에 있는 이미지 출력
             
         if current_winfo == last_winfo and self.image_Q.empty(): continue
         if current_winfo != last_winfo: current_winfo = last_winfo
-        if not self.image_Q.empty(): self.current_origin_image = self.image_Q.get()[:,:,::-1]
+        if not self.image_Q.empty(): self.current_origin_image = self.image_Q.get() # BGR
         if self.current_origin_image is None: continue
             
         __auto_resize_img(self)
-        imgtk = ImageTk.PhotoImage(Image.fromarray(self.current_image))
+        imgtk = ImageTk.PhotoImage(Image.fromarray(self.current_image[:,:,::-1]))
         self.image_label.configure(image=imgtk)
         self.image_label.image = imgtk
+    
+    self.current_origin_image = None #np.zeros((100,100,3), dtype=np.uint8)
+    self.current_image = None
+    self.image_label.configure(image=None)
+    self.image_label.image = None
+    
 
 def __auto_resize_img(self):
     h, w = self.current_origin_image.shape[:2]
@@ -86,32 +72,38 @@ def __auto_resize_img(self):
 def data_eater(self):
     while not self.stop_signal:
         time.sleep(0.02)
-        if self.data_Q.empty(): continue
-            
-        code = self.data_Q.get()
-        self.code2cnt[code] += 1
-        update_gui(self, code)
-
-def update_gui(self, code, init=False):
-    # day_cnt gui
-    day_cnt_all = sum(self.code2cnt.values())
-    day_cnt_ng = self.code2cnt[None]
-    day_cnt_ok = day_cnt_all - day_cnt_ng
-    self.day_cnt_all.configure(text=day_cnt_all)
-    self.day_cnt_ok.configure(text=day_cnt_ok)
-    self.day_cnt_ng.configure(text=day_cnt_ng)
-    if init: return
         
-    # single_cnt
-    if code is None: name = "인식실패"
-    elif code in self.code2name: name = self.code2name[code]
-    else: name = "새로운 제품"
-    self.name_label.configure(text=name)
-    self.single_cnt.configure(text=self.code2cnt[code])
+        if self.data_Q.empty(): continue    
+        name = self.data_Q.get()
+        
+        # 전체 데이터에 추가
+        self.name2cnt[name] += 1
+        update_gui(self, name)
+
+def update_gui(self, name):
+    assert name is None or name in self.poly_detector.names
+    
+    # 전체통계
+    cnt_all = sum(self.name2cnt.values())
+    cnt_ng = self.name2cnt[None]
+    cnt_ok = cnt_all - cnt_ng
+    self.total_ffl1.configure(text=cnt_all)
+    self.total_ffl2.configure(text=cnt_ok)
+    self.total_ffl3.configure(text=cnt_ng)
+
+    # 세부통계
+    idx = self.poly_detector.names.index(name) if name is not None else len(self.poly_detector.names)
+    self.listbox2.delete(idx)
+    self.listbox2.insert(idx, self.name2cnt[name])
+            
      
     # OK, NG
-    if code: self.ok_label.configure(text='OK', fg='#6f6')
-    else: self.ok_label.configure(text='NG', fg='#f00')
+    if name: self.ok_label.configure(text='OK', fg='#ff0', bg='#0cf', anchor='center')
+    else: self.ok_label.configure(text='NG', fg='#ff0', bg='#f30', anchor='center')
+    
+    # 현재 제품 정보
+    if name is None: name = "인식실패 OR 새로운제품"
+    self.objinfo.configure(text=name)
     
 #######################################################################
 #######################################################################
