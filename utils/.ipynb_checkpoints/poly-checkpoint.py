@@ -174,7 +174,6 @@ class MultiPolyDetector():
             if best_acc < accuracy:
                 best_obj, best_acc, best_M = obj_info, accuracy, M
         
-        print(best_acc)
         logger.debug(f"Best Acc : {best_acc*100:0.2f}% \t Best_Obj : {best_obj}")
         if best_acc < 0.20: return None, None
     

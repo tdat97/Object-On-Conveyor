@@ -113,47 +113,47 @@ def auto_light_cam(self, offset=0.02):
     
 #######################################################################
 def read(self):
-    # try:
-    self.poly_detector.update_check()
-    lock = False
+    try:
+        self.poly_detector.update_check()
+        lock = False
 
-    while not self.stop_signal:
-        time.sleep(0.01)
-        start_time = time.time()
+        while not self.stop_signal:
+            time.sleep(0.01)
+            start_time = time.time()
 
-        # get image
-        if self.raw_Q.empty(): continue
-        img, diff_img = self.raw_Q.get()
+            # get image
+            if self.raw_Q.empty(): continue
+            img, diff_img = self.raw_Q.get()
 
-        # check center in area
-        diff_polys = tool.find_polys_in_img(diff_img)
-        if diff_polys is None: continue
-        diff_poly = diff_polys[0]
-        diff_center = np.mean(diff_poly, axis=0)
-        size = np.array(diff_img.shape[:2])[::-1] # xy
-        locs = diff_center / size
-        is_center = np.all((self.area_box[0] < locs) & (locs < self.area_box[1]))
-        is_center2 = np.all((self.area_box2[0] < locs) & (locs < self.area_box2[1]))
+            # check center in area
+            diff_polys = tool.find_polys_in_img(diff_img)
+            if diff_polys is None: continue
+            diff_poly = diff_polys[0]
+            diff_center = np.mean(diff_poly, axis=0)
+            size = np.array(diff_img.shape[:2])[::-1] # xy
+            locs = diff_center / size
+            is_center = np.all((self.area_box[0] < locs) & (locs < self.area_box[1]))
+            is_center2 = np.all((self.area_box2[0] < locs) & (locs < self.area_box2[1]))
 
-        if not is_center2: lock = False; continue
-        if lock or not is_center: continue
-        lock = True
+            if not is_center2: lock = False; continue
+            if lock or not is_center: continue
+            lock = True
 
-        # predict
-        obj_info, dst_polys = self.poly_detector.predict(img)
+            # predict
+            obj_info, dst_polys = self.poly_detector.predict(img)
 
-        end_time = time.time()
-        logger.info(f"Detect Time : {end_time-start_time:.3f}")
-        self.analy_Q.put([img, obj_info, dst_polys, diff_poly])
+            end_time = time.time()
+            logger.info(f"Detect Time : {end_time-start_time:.3f}")
+            self.analy_Q.put([img, obj_info, dst_polys, diff_poly])
 
-        # save
-        self.recode_Q.put([img, 'raw'])
-        if obj_info is None: self.recode_Q.put([diff_img, 'debug'])
+            # save
+            self.recode_Q.put([img, 'raw'])
+            if obj_info is None: self.recode_Q.put([diff_img, 'debug'])
             
-    # except Exception as e:
-    #     logger.error(f"[read]{e}")
-    #     self.write_sys_msg(e)
-    #     self.stop_signal = True
+    except Exception as e:
+        logger.error(f"[read]{e}")
+        self.write_sys_msg(e)
+        self.stop_signal = True
 
 #######################################################################
 def analysis(self):
@@ -191,53 +191,53 @@ def draw(self):
     # colors = list(map(lambda x:tuple(map(int,x)), np.random.randint(0, 255, size=(4,3))))
     color_dic = dict(zip(self.poly_detector.names, colors))
     # font = cv2.FONT_HERSHEY_SIMPLEX
-    font = ImageFont.truetype(FONT_PATH, 20)
+    font = ImageFont.truetype(FONT_PATH, 40)
     
     # img_shape = np.array(self.cam.img_shape[:2])[::-1] # xy
     # real_area_box = (self.area_box * img_shape).astype(np.int32)
     
-    # try:
-    while not self.stop_signal:
-        time.sleep(0.01)
+    try:
+        while not self.stop_signal:
+            time.sleep(0.01)
 
-        # get img, names, marker, polys
-        if self.draw_Q.empty(): continue
-        img, name, poly, diff_poly = self.draw_Q.get()
-        poly = poly.astype(np.int32)
+            # get img, names, marker, polys
+            if self.draw_Q.empty(): continue
+            img, name, poly, diff_poly = self.draw_Q.get()
+            poly = poly.astype(np.int32)
 
-        # draw area box # cv2에서는 BGR이지만 카메라로 촬영한 이미지이기 때문에 (255,0,0) -> Red
-        # cv2.rectangle(img, real_area_box[0], real_area_box[1], (255,0,0), 3)
+            # draw area box # cv2에서는 BGR이지만 카메라로 촬영한 이미지이기 때문에 (255,0,0) -> Red
+            # cv2.rectangle(img, real_area_box[0], real_area_box[1], (255,0,0), 3)
 
-        # draw poly
-        color = color_dic[name] if name else (255,255,0)
-        cv2.polylines(img, [diff_poly], True, (255,255,255), thickness=5)
-        cv2.polylines(img, [poly], True, color, thickness=5)
-        if name is None:
+            # draw poly
+            color = color_dic[name] if name else (255,255,0)
+            cv2.polylines(img, [diff_poly], True, (255,255,255), thickness=5)
+            cv2.polylines(img, [poly], True, color, thickness=5)
+            if name is None:
+                self.image_Q.put(img)
+                self.recode_Q.put([img, name])
+                continue
+
+            # draw points
+            cv2.putText(img, '1', poly[0], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
+            cv2.putText(img, '2', poly[1], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
+            cv2.putText(img, '3', poly[2], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
+            cv2.putText(img, '4', poly[3], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
+
+            # draw name
+            x,y = poly[0]
+            y -= 40
+            img_pil = Image.fromarray(img)
+            img_draw = ImageDraw.Draw(img_pil)
+            img_draw.text((x,y), name, font=font, fill=(*color, 0))
+            img = np.array(img_pil)
+
             self.image_Q.put(img)
             self.recode_Q.put([img, name])
-            continue
         
-        # draw points
-        cv2.putText(img, '1', poly[0], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img, '2', poly[1], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img, '3', poly[2], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img, '4', poly[3], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-
-        # draw name
-        x,y = poly[0]
-        y -= 40
-        img_pil = Image.fromarray(img)
-        img_draw = ImageDraw.Draw(img_pil)
-        img_draw.text((x,y), name, font=font, fill=(*color, 0))
-        img = np.array(img_pil)
-
-        self.image_Q.put(img)
-        self.recode_Q.put([img, name])
-        
-    # except Exception as e:
-    #     logger.error(f"[draw]{e}")
-    #     self.write_sys_msg(e)
-    #     self.stop_signal = True
+    except Exception as e:
+        logger.error(f"[draw]{e}")
+        self.write_sys_msg(e)
+        self.stop_signal = True
 
 #######################################################################
 def snap(self):

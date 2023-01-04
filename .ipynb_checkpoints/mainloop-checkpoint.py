@@ -108,13 +108,11 @@ class VisualControl():
         self.total_ffl3.configure(text=cnt_ok)
         
         # 세부통계
+        self.listbox1.delete(0, 'end')
+        self.listbox2.delete(0, 'end')
         for i, name in enumerate(self.poly_detector.names):
-            self.listbox1.delete(i)
-            self.listbox2.delete(i)
             self.listbox1.insert(i, name)
             self.listbox2.insert(i, self.name2cnt[name])
-        self.listbox1.delete(len(self.poly_detector.names))
-        self.listbox2.delete(len(self.poly_detector.names))
         self.listbox1.insert(len(self.poly_detector.names), "NG")
         self.listbox2.insert(len(self.poly_detector.names), self.name2cnt[None])
         

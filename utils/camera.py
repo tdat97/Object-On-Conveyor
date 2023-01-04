@@ -23,7 +23,7 @@ class SentechCam():
         self.img_shape = self.get_image().shape
         
     def get_image(self):
-        start = time.time()
+        # start = time.time()
         
         self.st_device.acquisition_start()
         with self.st_datastream.retrieve_buffer() as st_buffer:
@@ -54,21 +54,21 @@ class SentechCam():
             if pixel_format_info.is_bayer:
                 bayer_type = pixel_format_info.get_pixel_color_filter()
                 if bayer_type == st.EStPixelColorFilter.BayerRG:
-                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_RG2BGR)
+                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_RG2RGB)
                 elif bayer_type == st.EStPixelColorFilter.BayerGR:
-                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_GR2BGR)
+                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_GR2RGB)
                 elif bayer_type == st.EStPixelColorFilter.BayerGB:
-                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_GB2BGR)
+                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_GB2RGB)
                 elif bayer_type == st.EStPixelColorFilter.BayerBG:
-                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_BG2BGR)
+                    nparr = cv2.cvtColor(nparr, cv2.COLOR_BAYER_BG2RGB)
         
         self.st_device.acquisition_stop()
-        end = time.time()
+        # end = time.time()
         
-        if self.logger is not None:
-            self.logger.debug(f"Shot Time : {end-start:.4f}")
+        # if self.logger is not None:
+        #     self.logger.debug(f"Shot Time : {end-start:.4f}")
             
-        return nparr
+        return nparr # RGB 라는데 BGR 임
     
     def set_configure(self):
         nodemap = self.st_device.remote_port.nodemap

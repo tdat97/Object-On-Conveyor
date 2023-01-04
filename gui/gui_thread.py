@@ -10,7 +10,7 @@ from tkinter import PhotoImage
 
 def device_check(self):
     # Load Cam
-    # self.cam, err = get_cam(EXPOSURE_TIME, logger=logger)
+    # self.cam, err = device.get_cam(EXPOSURE_TIME, logger=logger)
     self.cam, err = device.get_cam2()
     if self.cam:
         logger.info("Cam Started.")

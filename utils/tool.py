@@ -67,7 +67,7 @@ def get_diff_img(img1, img2):
     # subtract
     sub = img1.astype(np.int32) - img2.astype(np.int32)
     result = np.abs(sub).astype(np.uint8)
-    _, result = cv2.threshold(result, 10,255, cv2.THRESH_BINARY)
+    _, result = cv2.threshold(result, 5,255, cv2.THRESH_BINARY)
     
     # dilate
     # kernel = np.ones((3,3))
@@ -107,7 +107,7 @@ def find_poly_in_img(img, min_area=0.05, max_area=0.7, scale=0.1):
 
     return poly
 
-def find_polys_in_img(img, min_area=0.05, max_area=0.7, scale=0.1):
+def find_polys_in_img(img, min_area=0.03, max_area=0.7, scale=0.1):
     assert img.dtype == np.uint8
     
     img_area = img.shape[0] * img.shape[1]
