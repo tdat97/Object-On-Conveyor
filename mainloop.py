@@ -67,6 +67,7 @@ class VisualControl():
         # 초기정보 적용
         self.name2cnt = defaultdict(int)
         self.init_gui_data()
+        self.make_recode_dir()
         
 
         # 카메라, 보드 연결
@@ -119,6 +120,14 @@ class VisualControl():
         # 현재 제품 정보
         self.objinfo.configure(text="")
         
+    #######################################################################
+    def make_recode_dir(self):
+        if not os.path.isdir(SAVE_IMG_DIR): os.mkdir(SAVE_IMG_DIR)
+        if not os.path.isdir(SAVE_RAW_IMG_DIR): os.mkdir(SAVE_RAW_IMG_DIR)
+        if not os.path.isdir(SAVE_OK_IMG_DIR): os.mkdir(SAVE_OK_IMG_DIR)
+        if not os.path.isdir(SAVE_NG_IMG_DIR): os.mkdir(SAVE_NG_IMG_DIR)
+        if not os.path.isdir(SAVE_DEBUG_IMG_DIR): os.mkdir(SAVE_DEBUG_IMG_DIR)
+    
     #######################################################################
     def stop(self):
         self.write_sys_msg("중지.")

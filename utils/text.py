@@ -8,6 +8,7 @@ IMG_DIR_PATH = "./source/img"
 JSON_DIR_PATH = "./source/json"
 
 # recode
+SAVE_IMG_DIR = "./recode"
 SAVE_RAW_IMG_DIR = "./recode/raw"
 SAVE_OK_IMG_DIR = "./recode/OK"
 SAVE_NG_IMG_DIR = "./recode/NG"
