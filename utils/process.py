@@ -170,7 +170,7 @@ def analysis(self):
                 i = obj_info.labels.index("object")
                 poly1 = Polygon(dst_polys[i])
                 poly2 = Polygon(diff_poly)
-                iou = poly1.union(poly2).area / poly1.intersection(poly2).area
+                iou = poly1.intersection(poly2).area / poly1.union(poly2).area
                 if iou < 0.7: obj_info, dst_polys = None, None
             
             poly = dst_polys[obj_info.labels.index("object")] if obj_info else diff_poly

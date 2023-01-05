@@ -79,6 +79,13 @@ class SentechCam():
         
         if self.logger is not None:
             self.logger.debug(f"ExposureTime:{self.ExposureTime}, AcquisitionMode:{self.AcquisitionMode}")
+            
+    def set_exposure(self, value):
+        assert type(value) == int and 500 <= value <= 50000
+        nodemap = self.st_device.remote_port.nodemap
+        node = nodemap.get_node("ExposureTime")
+        st.PyIFloat(node).set_value(value)
+        
         
 
         
