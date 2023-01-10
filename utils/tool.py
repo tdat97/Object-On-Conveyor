@@ -59,14 +59,11 @@ def clear_serial(ser):
 def get_diff_img(img1, img2):
     assert img1.shape == img2.shape
     
-    # To Grayscale
-    if len(img1.shape) == 3:
-        img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-        img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-
-    # subtract
-    sub = img1.astype(np.int32) - img2.astype(np.int32)
-    result = np.abs(sub).astype(np.uint8)
+    # get diff
+    result = cv2.absdiff(img1, img2)
+    if len(result.shape) == 3:
+        result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+    
     _, result = cv2.threshold(result, 5,255, cv2.THRESH_BINARY)
     
     # dilate

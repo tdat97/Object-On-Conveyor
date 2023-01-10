@@ -64,11 +64,14 @@ def auto_light_cam(self, offset=0.02):
     before_light_on = False
     light_on = False
     before_ratio = 0
+    exp_time = {True:2500, False:25000}
     
+    self.cam.set_exposure(25000)
     img_off = self.cam.get_image()
     self.serial.write(LIGHT_ON)
 
     time.sleep(0.2)
+    self.cam.set_exposure(2500)
     img_on = self.cam.get_image()
     self.serial.write(LIGHT_OFF)
     
@@ -86,6 +89,7 @@ def auto_light_cam(self, offset=0.02):
         if 1 < self.raw_Q.qsize(): continue
         
         # 촬영
+        self.cam.set_exposure(exp_time[light_on])
         img = self.cam.get_image()
         if img is None: continue
         
@@ -170,7 +174,7 @@ def analysis(self):
                 i = obj_info.labels.index("object")
                 poly1 = Polygon(dst_polys[i])
                 poly2 = Polygon(diff_poly)
-                iou = poly1.union(poly2).area / poly1.intersection(poly2).area
+                iou = poly1.intersection(poly2).area / poly1.union(poly2).area
                 if iou < 0.7: obj_info, dst_polys = None, None
             
             poly = dst_polys[obj_info.labels.index("object")] if obj_info else diff_poly
@@ -243,6 +247,7 @@ def draw(self):
 def snap(self):
     self.serial.write(LIGHT_ON)
     time.sleep(0.2)
+    self.cam.set_exposure(2500)
     img = self.cam.get_image()
     self.serial.write(LIGHT_OFF)
     self.image_Q.put(img)

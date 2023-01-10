@@ -64,11 +64,14 @@ def auto_light_cam(self, offset=0.02):
     before_light_on = False
     light_on = False
     before_ratio = 0
+    exp_time = {True:2500, False:25000}
     
+    self.cam.set_exposure(25000)
     img_off = self.cam.get_image()
     self.serial.write(LIGHT_ON)
 
     time.sleep(0.2)
+    self.cam.set_exposure(2500)
     img_on = self.cam.get_image()
     self.serial.write(LIGHT_OFF)
     
@@ -86,6 +89,7 @@ def auto_light_cam(self, offset=0.02):
         if 1 < self.raw_Q.qsize(): continue
         
         # 촬영
+        self.cam.set_exposure(exp_time[light_on])
         img = self.cam.get_image()
         if img is None: continue
         
@@ -243,6 +247,7 @@ def draw(self):
 def snap(self):
     self.serial.write(LIGHT_ON)
     time.sleep(0.2)
+    self.cam.set_exposure(2500)
     img = self.cam.get_image()
     self.serial.write(LIGHT_OFF)
     self.image_Q.put(img)
