@@ -30,36 +30,18 @@ def get_cam2():
     except Exception as e:
         return None, e
 
-def get_serial(port, cam, offset=0.25):
+def get_serial(port):
     try:
-        my_serial = serial.Serial(port, 9600, timeout=0, bytesize=serial.EIGHTBITS, 
-                                  stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_ODD)
+        my_serial = serial.Serial(port, 9600, timeout=0.05)
 
-        # 빛 변화 촬영
-        time.sleep(0.2)
-        cam.set_exposure(25000)
-        img_t0 = cam.get_image()
-        my_serial.write(LIGHT_ON)
+        my_serial.write(b"\xB0\x00\x00\xB0")
+        value = my_serial.read(4)
         
-        time.sleep(0.2)
-        cam.set_exposure(2500)
-        img_t1 = cam.get_image()
-        my_serial.write(LIGHT_OFF)
-
-        # debug
-        tool.imwrite("./temp/light_on.jpg", img_t1)
-        tool.imwrite("./temp/light_off.jpg", img_t0)
-        
-        # 이미지 차이
-        img = tool.get_diff_img(img_t0, img_t1)
-        
-
-        # 차이 변화 감지
-        ratio = tool.diff2ratio(img)
-        if ratio > offset:
-            return my_serial, None
-        else:
+        if value[0] != 0xc0:
             raise Exception("Make sure to connect serial.")
+            
+        return my_serial, None
         
     except Exception as e:
         return None, e
+    

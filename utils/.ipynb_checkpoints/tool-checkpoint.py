@@ -157,8 +157,7 @@ def imwrite(path, img):
             encoded_img.tofile(f)
     return result
 
-
-
+##########################################################################
 
 
         

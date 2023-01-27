@@ -15,9 +15,11 @@ SAVE_NG_IMG_DIR = "./recode/NG"
 SAVE_DEBUG_IMG_DIR = "./recode/debug"
 
 # Serial
-SERIAL_PORT = "COM4"
-LIGHT_ON = b'\xA0\x01\x01\xA2'
-LIGHT_OFF = b'\xA0\x01\x00\xA1'
+SERIAL_PORT = "COM1"
+# ex) 0xB0 0x01 0x00 0xB1 -> get input-pin-1 sensor value
+# ex) 0xC0 0x01 0x01 0xC0 -> reply (input-pin-1 is HIGH)
+# ex) 0xA0 0x02 0x01 0xA3 -> turn on output-pin-2 
+# ex) 0xFF 0x00 0x00 0xFF -> Incorrect validation.
 
 # Cam
 EXPOSURE_TIME = 2500

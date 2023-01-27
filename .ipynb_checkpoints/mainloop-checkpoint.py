@@ -39,8 +39,8 @@ class VisualControl():
         self.current_image = None
         self.not_found_path = SAVE_NG_IMG_DIR
         self.sys_msg_list = []
-        self.area_box = np.array([[0.45, 0.0], [0.55, 1.0]]) # xyxy
-        self.area_box2 = np.array([[0.40, 0.0], [0.60, 1.0]]) # xyxy
+        # self.area_box = np.array([[0.45, 0.0], [0.55, 1.0]]) # xyxy
+        # self.area_box2 = np.array([[0.40, 0.0], [0.60, 1.0]]) # xyxy
         self.write_sys_msg("test")
         self.write_sys_msg("Loading...")
 
@@ -156,7 +156,7 @@ class VisualControl():
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=gthr.data_eater, args=(self,), daemon=True).start()
-        Thread(target=process.auto_light_cam, args=(self,), daemon=True).start()
+        Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.read, args=(self,), daemon=True).start()
         Thread(target=process.analysis, args=(self,), daemon=True).start()
         Thread(target=process.draw, args=(self,), daemon=True).start()
@@ -196,6 +196,7 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
+        Thread(target=process.raw_Q2image_Q, args=(self,), daemon=True).start()
 
         self.button1.configure(text="Waiting...", command=lambda:time.sleep(0.1))
         self.button2.configure(text="", command=lambda:time.sleep(0.1))
@@ -244,7 +245,7 @@ class VisualControl():
         tool.clear_Q(self.enter_Q)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
-        Thread(target=process.auto_light_cam, args=(self,), daemon=True).start()
+        Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.train, args=(self,), daemon=True).start()
         Thread(target=process.json_saver, args=(self,), daemon=True).start()
         
