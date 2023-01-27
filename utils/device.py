@@ -37,10 +37,12 @@ def get_serial(port, cam, offset=0.25):
 
         # 빛 변화 촬영
         time.sleep(0.2)
+        cam.set_exposure(25000)
         img_t0 = cam.get_image()
         my_serial.write(LIGHT_ON)
         
         time.sleep(0.2)
+        cam.set_exposure(2500)
         img_t1 = cam.get_image()
         my_serial.write(LIGHT_OFF)
 
