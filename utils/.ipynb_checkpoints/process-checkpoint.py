@@ -65,7 +65,7 @@ def raw_Q2image_Q(self): # 촬영모드 전용
         time.sleep(0.02)
         
         if self.raw_Q.empty(): continue
-        self.image_Q.out(self.raw_Q.get())
+        self.image_Q.put(self.raw_Q.get())
         
 #######################################################################
 def read(self):
@@ -133,7 +133,8 @@ def draw(self):
             # get img, names, marker, polys
             if self.draw_Q.empty(): continue
             img, name, poly = self.draw_Q.get()
-            poly = poly.astype(np.int32)
+            if poly is not None:
+                poly = poly.astype(np.int32)
 
             # draw area box # cv2에서는 BGR이지만 카메라로 촬영한 이미지이기 때문에 (255,0,0) -> Red
             # cv2.rectangle(img, real_area_box[0], real_area_box[1], (255,0,0), 3)
@@ -184,7 +185,7 @@ def train(self):
         
         # 이미지에서 제품 Polygon 따기
         img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        img_mask = cv2.inRange(img_hsv, (0, 0, 50), (360, 255, 255))
+        img_mask = cv2.inRange(img_hsv, (0, 0, 20), (360, 255, 255)) # 50 -> 20
         img_mask = cv2.erode(img_mask, kernel, iterations=3)
         img_mask = cv2.dilate(img_mask, kernel, iterations=3)
         polys = tool.find_polys_in_img(img_mask)

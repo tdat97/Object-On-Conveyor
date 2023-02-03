@@ -31,7 +31,7 @@ def snap(self):
     self.serial.write(bytes_dic["light_on"])
     lock.release()
     
-    time.sleep(0.2)
+    time.sleep(0.07)
     # self.cam.set_exposure(2500)
     img = self.cam.get_image()
     
@@ -65,7 +65,7 @@ def raw_Q2image_Q(self): # 촬영모드 전용
         time.sleep(0.02)
         
         if self.raw_Q.empty(): continue
-        self.image_Q.out(self.raw_Q.get())
+        self.image_Q.put(self.raw_Q.get())
         
 #######################################################################
 def read(self):
@@ -133,7 +133,8 @@ def draw(self):
             # get img, names, marker, polys
             if self.draw_Q.empty(): continue
             img, name, poly = self.draw_Q.get()
-            poly = poly.astype(np.int32)
+            if poly is not None:
+                poly = poly.astype(np.int32)
 
             # draw area box # cv2에서는 BGR이지만 카메라로 촬영한 이미지이기 때문에 (255,0,0) -> Red
             # cv2.rectangle(img, real_area_box[0], real_area_box[1], (255,0,0), 3)
@@ -147,10 +148,10 @@ def draw(self):
                 continue
 
             # draw points
-            cv2.putText(img, '1', poly[0], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-            cv2.putText(img, '2', poly[1], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-            cv2.putText(img, '3', poly[2], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-            cv2.putText(img, '4', poly[3], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
+            cv2.putText(img, '1', poly[0], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
+            cv2.putText(img, '2', poly[1], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
+            cv2.putText(img, '3', poly[2], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
+            cv2.putText(img, '4', poly[3], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
 
             # draw name
             x,y = poly[0]
@@ -184,7 +185,7 @@ def train(self):
         
         # 이미지에서 제품 Polygon 따기
         img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        img_mask = cv2.inRange(img_hsv, (0, 0, 50), (360, 255, 255))
+        img_mask = cv2.inRange(img_hsv, (0, 0, 20), (360, 255, 255)) # 50 -> 20
         img_mask = cv2.erode(img_mask, kernel, iterations=3)
         img_mask = cv2.dilate(img_mask, kernel, iterations=3)
         polys = tool.find_polys_in_img(img_mask)
@@ -197,10 +198,10 @@ def train(self):
         # 그리기
         clock_poly = tool.poly2clock(poly)
         cv2.polylines(img_copy, [clock_poly], True, (255,255,255), thickness=5)
-        cv2.putText(img_copy, '1', clock_poly[0], font, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img_copy, '2', clock_poly[1], font, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img_copy, '3', clock_poly[2], font, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img_copy, '4', clock_poly[3], font, fontScale=1, thickness=1, color=(255,0,255))
+        cv2.putText(img_copy, '1', clock_poly[0], font, fontScale=2, thickness=2, color=(255,0,255))
+        cv2.putText(img_copy, '2', clock_poly[1], font, fontScale=2, thickness=2, color=(255,0,255))
+        cv2.putText(img_copy, '3', clock_poly[2], font, fontScale=2, thickness=2, color=(255,0,255))
+        cv2.putText(img_copy, '4', clock_poly[3], font, fontScale=2, thickness=2, color=(255,0,255))
         
                 
         self.pair_Q.put([img, clock_poly])

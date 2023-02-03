@@ -80,7 +80,7 @@ def diff2ratio(img):
     ratio = np.sum(img/255.) / (img.shape[0]*img.shape[1])
     return ratio
         
-def find_poly_in_img(img, min_area=0.05, max_area=0.7, scale=0.1):
+def find_poly_in_img(img, min_area=0.05, max_area=0.7, scale=0.1): # 안쓰임
     assert img.dtype == np.uint8
     
     # minimize img for speed.
@@ -104,7 +104,7 @@ def find_poly_in_img(img, min_area=0.05, max_area=0.7, scale=0.1):
 
     return poly
 
-def find_polys_in_img(img, min_area=0.03, max_area=0.7, scale=0.1):
+def find_polys_in_img(img, min_area=0.01, max_area=0.7, scale=0.1): # 0.03 -> 0.01
     assert img.dtype == np.uint8
     
     img_area = img.shape[0] * img.shape[1]
