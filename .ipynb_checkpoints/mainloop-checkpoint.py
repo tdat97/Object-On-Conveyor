@@ -252,6 +252,7 @@ class VisualControl():
         Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.train, args=(self,), daemon=True).start()
         Thread(target=process.json_saver, args=(self,), daemon=True).start()
+        Thread(target=process.recode, args=(self,), daemon=True).start()
         
 
         self.button1.configure(text="Waiting...", command=lambda:time.sleep(0.1))
