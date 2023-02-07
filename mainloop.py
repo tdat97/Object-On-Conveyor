@@ -10,11 +10,10 @@ import tkinter.filedialog as filedialog
 import numpy as np
 import cv2
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 import time
 import serial
 import os
-
 
 class VisualControl():
     def __init__(self, root):
@@ -27,6 +26,7 @@ class VisualControl():
         self.root.geometry(f"{self.screenwidth//3*2}x{self.screenheight//3*2}")
         self.root.minsize(self.screenwidth//3*2, self.screenheight//3*2)
         self.fsize_factor = np.linalg.norm((self.screenheight, self.screenwidth)) / 2202.9071700822983
+        self.thr_lock = Lock() # lock.acquire() lock.release()
         
         # 디자인
         configure(self)
@@ -174,7 +174,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.object_names = None
-        self.serial.write(LIGHT_OFF)
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["light_off"])
+        self.thr_lock.release()
         self.init_button_()
         self.ok_label.configure(text='NONE', fg='#ff0', bg='#333', anchor='center')
         self.objinfo.configure(text="")
@@ -210,7 +212,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.init_button_()
-        self.serial.write(LIGHT_OFF)
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["light_off"])
+        self.thr_lock.release()
     
     def save(self):
         logger.info("Save button clicked.")
@@ -268,7 +272,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.init_button_()
-        self.serial.write(LIGHT_OFF)
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["light_off"])
+        self.thr_lock.release()
         
         # 입력칸 부분에 OK,NG
         self.input_name.place_forget()
