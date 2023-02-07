@@ -12,14 +12,14 @@ import os
 
 from PIL import ImageTk, Image
 
-bytes_dic = {"light_on"   : bytes([0xA0, 0x00, 0x01, 0xA0 ^ 0x00 ^ 0x01]),
-             "light_off"  : bytes([0xA0, 0x00, 0x00, 0xA0 ^ 0x00 ^ 0x00]),
-             "green_on"   : bytes([0xA0, 0x01, 0x01, 0xA0 ^ 0x01 ^ 0x01]),
-             "green_off"  : bytes([0xA0, 0x01, 0x00, 0xA0 ^ 0x01 ^ 0x00]),
-             "yellow_on"  : bytes([0xA0, 0x02, 0x01, 0xA0 ^ 0x02 ^ 0x01]),
-             "yellow_off" : bytes([0xA0, 0x02, 0x00, 0xA0 ^ 0x02 ^ 0x00]),
-             "red_on"     : bytes([0xA0, 0x03, 0x01, 0xA0 ^ 0x03 ^ 0x01]),
-             "red_off"    : bytes([0xA0, 0x03, 0x00, 0xA0 ^ 0x03 ^ 0x00]),
+BYTES_DIC = {"light_on"   : bytes([0xA0, 0x00, 0x01, 0xA0 ^ 0x00 ^ 0x01]),
+             # "light_off"  : bytes([0xA0, 0x00, 0x00, 0xA0 ^ 0x00 ^ 0x00]),
+             # "green_on"   : bytes([0xA0, 0x01, 0x01, 0xA0 ^ 0x01 ^ 0x01]),
+             # "green_off"  : bytes([0xA0, 0x01, 0x00, 0xA0 ^ 0x01 ^ 0x00]),
+             # "yellow_on"  : bytes([0xA0, 0x02, 0x01, 0xA0 ^ 0x02 ^ 0x01]),
+             # "yellow_off" : bytes([0xA0, 0x02, 0x00, 0xA0 ^ 0x02 ^ 0x00]),
+             "red_on"     : bytes([0xA0, 0x01, 0x01, 0xA0 ^ 0x01 ^ 0x01]),
+             "red_off"    : bytes([0xA0, 0x01, 0x00, 0xA0 ^ 0x01 ^ 0x00]),
              "get_sensor1": bytes([0xB0, 0x00, 0x00, 0xB0 ^ 0x00 ^ 0x00]),
              "get_sensor2": bytes([0xB0, 0x01, 0x00, 0xB0 ^ 0x01 ^ 0x00]),}
 
@@ -28,7 +28,7 @@ lock = Lock() # lock.acquire() lock.release()
 #######################################################################
 def snap(self):
     lock.acquire()
-    self.serial.write(bytes_dic["light_on"])
+    self.serial.write(BYTES_DIC["light_on"])
     lock.release()
     
     time.sleep(0.07)
@@ -36,7 +36,7 @@ def snap(self):
     img = self.cam.get_image()
     
     lock.acquire()
-    self.serial.write(bytes_dic["light_off"])
+    self.serial.write(BYTES_DIC["light_off"])
     lock.release()
     
     self.raw_Q.put(img)
@@ -49,7 +49,7 @@ def snaper(self):
         time.sleep(0.05)
         
         lock.acquire()
-        self.serial.write(bytes_dic["get_sensor1"])
+        self.serial.write(BYTES_DIC["get_sensor1"])
         value = self.serial.read(4)
         lock.release()
         
@@ -96,6 +96,12 @@ def read(self):
         self.stop_signal = True
 
 #######################################################################
+def turn_off(self, data, n_time):
+    time.sleep(n_time)
+    lock.acquire()
+    self.serial.write(data)
+    lock.release()
+
 def analysis(self):
     try:
         while not self.stop_signal:
@@ -104,7 +110,14 @@ def analysis(self):
             # get img, detect
             if self.analy_Q.empty(): continue
             img, obj_info, dst_polys = self.analy_Q.get()
-            
+                        
+            if obj_info is None:
+                lock.acquire()
+                self.serial.write(BYTES_DIC["red_on"])
+                lock.release()
+                # turn off alram after 0.2s
+                Thread(target=turn_off, args=(self, BYTES_DIC["red_off"], 0.2), daemon=True).start()
+   
             poly = dst_polys[obj_info.labels.index("object")] if obj_info else None
             name = obj_info.name if obj_info else None
             
