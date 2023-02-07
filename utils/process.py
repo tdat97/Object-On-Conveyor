@@ -190,15 +190,13 @@ def train(self):
         img_mask = cv2.inRange(img_hsv, (0, 0, 35), (360, 255, 255)) # 50 -> 20
         img_mask = cv2.erode(img_mask, kernel, iterations=3)
         img_mask = cv2.dilate(img_mask, kernel, iterations=3)
+        self.recode_Q.put([img_mask, 'debug']) # debug save
         polys = tool.find_polys_in_img(img_mask)
         if polys is None:
             self.write_sys_msg(f"이미지 인식 실패. 다시 시도해주세요.")
             continue
         poly = polys[0]
-        
-        # debug save
-        self.recode_Q.put([img_mask, 'debug'])
-            
+                    
         # 그리기
         clock_poly = tool.poly2clock(poly)
         cv2.polylines(img_copy, [clock_poly], True, (255,255,255), thickness=5)
