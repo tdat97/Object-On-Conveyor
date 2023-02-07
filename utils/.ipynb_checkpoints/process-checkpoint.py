@@ -98,7 +98,8 @@ def analysis(self):
             # get img, detect
             if self.analy_Q.empty(): continue
             img, obj_info, dst_polys = self.analy_Q.get()
-                        
+            
+            # alram
             if obj_info is None:
                 self.thr_lock.acquire()
                 self.serial.write(BYTES_DIC["red_on"])
@@ -195,6 +196,8 @@ def train(self):
             continue
         poly = polys[0]
         
+        # debug save
+        self.recode_Q.put([img_mask, 'debug'])
             
         # 그리기
         clock_poly = tool.poly2clock(poly)
