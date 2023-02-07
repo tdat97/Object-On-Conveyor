@@ -32,7 +32,7 @@ BYTES_DIC = {"light_on"   : bytes([0xA0, 0x00, 0x01, 0xA0 ^ 0x00 ^ 0x01]),
 # ex) 0xFF 0x00 0x00 0xFF -> Incorrect validation.
 
 # Cam
-EXPOSURE_TIME = 2500
+EXPOSURE_TIME = 1000
 
 # Font
 FONT_PATH = "./source/NanumGothic.ttf"

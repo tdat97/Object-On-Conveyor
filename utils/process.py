@@ -187,7 +187,7 @@ def train(self):
         
         # 이미지에서 제품 Polygon 따기
         img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        img_mask = cv2.inRange(img_hsv, (0, 0, 35), (360, 255, 255)) # 50 -> 20
+        img_mask = cv2.inRange(img_hsv, (0, 0, 60), (360, 255, 255))
         img_mask = cv2.erode(img_mask, kernel, iterations=3)
         img_mask = cv2.dilate(img_mask, kernel, iterations=3)
         self.recode_Q.put([img_mask, 'debug']) # debug save
