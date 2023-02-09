@@ -50,7 +50,8 @@ train-mode : one-shot, one-object-registration
 ---
 
 ##### Circuit Wiring
-![OOC회로](https://user-images.githubusercontent.com/48349693/217761292-3cb8cd86-032e-4809-a9fb-7115a0519376.png)
+![OOC회로](https://user-images.githubusercontent.com/48349693/217761864-568f0860-7dad-4d62-a3df-1b19b96a0690.png)
+
 
 
 
