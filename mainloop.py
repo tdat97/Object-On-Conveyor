@@ -10,11 +10,10 @@ import tkinter.filedialog as filedialog
 import numpy as np
 import cv2
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 import time
 import serial
 import os
-
 
 class VisualControl():
     def __init__(self, root):
@@ -27,6 +26,7 @@ class VisualControl():
         self.root.geometry(f"{self.screenwidth//3*2}x{self.screenheight//3*2}")
         self.root.minsize(self.screenwidth//3*2, self.screenheight//3*2)
         self.fsize_factor = np.linalg.norm((self.screenheight, self.screenwidth)) / 2202.9071700822983
+        self.thr_lock = Lock() # lock.acquire() lock.release()
         
         # 디자인
         configure(self)
@@ -39,8 +39,8 @@ class VisualControl():
         self.current_image = None
         self.not_found_path = SAVE_NG_IMG_DIR
         self.sys_msg_list = []
-        self.area_box = np.array([[0.45, 0.0], [0.55, 1.0]]) # xyxy
-        self.area_box2 = np.array([[0.40, 0.0], [0.60, 1.0]]) # xyxy
+        # self.area_box = np.array([[0.45, 0.0], [0.55, 1.0]]) # xyxy
+        # self.area_box2 = np.array([[0.40, 0.0], [0.60, 1.0]]) # xyxy
         self.write_sys_msg("test")
         self.write_sys_msg("Loading...")
 
@@ -153,10 +153,11 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         tool.clear_Q(self.data_Q)
         tool.clear_Q(self.recode_Q)
+        tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=gthr.data_eater, args=(self,), daemon=True).start()
-        Thread(target=process.auto_light_cam, args=(self,), daemon=True).start()
+        Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.read, args=(self,), daemon=True).start()
         Thread(target=process.analysis, args=(self,), daemon=True).start()
         Thread(target=process.draw, args=(self,), daemon=True).start()
@@ -174,7 +175,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.object_names = None
-        self.serial.write(LIGHT_OFF)
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["light_off"])
+        self.thr_lock.release()
         self.init_button_()
         self.ok_label.configure(text='NONE', fg='#ff0', bg='#333', anchor='center')
         self.objinfo.configure(text="")
@@ -194,8 +197,10 @@ class VisualControl():
     def snap_mode_thread(self):
         tool.clear_Q(self.raw_Q)
         tool.clear_Q(self.image_Q)
+        tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
+        Thread(target=process.raw_Q2image_Q, args=(self,), daemon=True).start()
 
         self.button1.configure(text="Waiting...", command=lambda:time.sleep(0.1))
         self.button2.configure(text="", command=lambda:time.sleep(0.1))
@@ -209,7 +214,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.init_button_()
-        self.serial.write(LIGHT_OFF)
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["light_off"])
+        self.thr_lock.release()
     
     def save(self):
         logger.info("Save button clicked.")
@@ -242,11 +249,13 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         tool.clear_Q(self.pair_Q)
         tool.clear_Q(self.enter_Q)
+        tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
-        Thread(target=process.auto_light_cam, args=(self,), daemon=True).start()
+        Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.train, args=(self,), daemon=True).start()
         Thread(target=process.json_saver, args=(self,), daemon=True).start()
+        Thread(target=process.recode, args=(self,), daemon=True).start()
         
 
         self.button1.configure(text="Waiting...", command=lambda:time.sleep(0.1))
@@ -267,7 +276,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.init_button_()
-        self.serial.write(LIGHT_OFF)
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["light_off"])
+        self.thr_lock.release()
         
         # 입력칸 부분에 OK,NG
         self.input_name.place_forget()

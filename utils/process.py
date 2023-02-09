@@ -1,158 +1,79 @@
 from utils.logger import logger
 from utils.text import *
-from utils import tool, device
+from utils import tool
 from collections import defaultdict
-from shapely.geometry import Polygon
-from PIL import ImageFont, ImageDraw, Image
-from threading import Thread
+# from shapely.geometry import Polygon
+from PIL import ImageFont, ImageDraw, Image, ImageTk
+from threading import Thread, Lock
 import numpy as np
 import time
 import cv2
 import os
 
-from PIL import ImageTk, Image
-
 #######################################################################
-def auto_light_cam_(self, offset=0.02):
-    before_light_on = False
-    light_on = False
-    before_ratio = 0
-    before_img = np.zeros(self.cam.img_shape, dtype=np.uint8)
+def snap(self):
+    self.thr_lock.acquire()
+    self.serial.write(BYTES_DIC["light_on"])
+    self.thr_lock.release()
     
-#     img_t0 = cam.get_image()
-#     my_serial.write(LIGHT_ON)
-
-#     time.sleep(0.2)
-#     img_t1 = cam.get_image()
-#     my_serial.write(LIGHT_OFF)
+    time.sleep(0.07)
+    # self.cam.set_exposure(2500)
+    img = self.cam.get_image()
     
+    self.thr_lock.acquire()
+    self.serial.write(BYTES_DIC["light_off"])
+    self.thr_lock.release()
     
-    while not self.stop_signal:
-        time.sleep(0.01)
-        # 가져갈때까지 대기
-        # if not self.raw_Q.empty(): continue
-        if 1 < self.raw_Q.qsize(): continue
-        
-        # 촬영
-        img = self.cam.get_image()
-        if img is None: continue
-        
-        # 동작 감지에 따른 조명 동작 # 2연속 조건 만족해야 동작
-        diff_img = tool.get_diff_img(before_img, img)
-        ratio = tool.diff2ratio(diff_img)
-        
-
-        if not light_on and ratio > offset and before_ratio > offset:
-            light_on = True
-            self.serial.write(LIGHT_ON)
-            time.sleep(0.15)
-        if light_on and ratio <= offset and before_ratio <= offset:
-            light_on = False
-            self.serial.write(LIGHT_OFF)
-            time.sleep(0.15)
-            
-        # 조명 켜져있을때만 보내기
-        if light_on and before_light_on and ratio > offset:
-            self.raw_Q.put([img, diff_img])
-
-        before_light_on = light_on
-        before_img = img
-        before_ratio = ratio
+    self.raw_Q.put(img)
     
 #######################################################################
-def auto_light_cam(self, offset=0.02):
-    before_light_on = False
-    light_on = False
-    before_ratio = 0
-    exp_time = {True:2500, False:25000}
-    
-    self.cam.set_exposure(25000)
-    img_off = self.cam.get_image()
-    self.serial.write(LIGHT_ON)
-
-    time.sleep(0.2)
-    self.cam.set_exposure(2500)
-    img_on = self.cam.get_image()
-    self.serial.write(LIGHT_OFF)
-    
-    if img_off is None or img_on is None:
-        logger.error("img is None.")
-        self.write_sys_msg("img is None.")
-        self.stop_signal = True
-        return
-    
+def snaper(self):
+    sensor_lock = False
     
     while not self.stop_signal:
-        time.sleep(0.01)
-        # 가져갈때까지 대기
-        # if not self.raw_Q.empty(): continue
-        if 1 < self.raw_Q.qsize(): continue
+        time.sleep(0.05)
         
-        # 촬영
-        self.cam.set_exposure(exp_time[light_on])
-        img = self.cam.get_image()
-        if img is None: continue
+        self.thr_lock.acquire()
+        self.serial.write(BYTES_DIC["get_sensor1"])
+        value = self.serial.read(4)
+        self.thr_lock.release()
         
-        # 동작 감지에 따른 조명 동작 # 2연속 조건 만족해야 동작
-        img_bg = img_on if light_on else img_off
-        diff_img = tool.get_diff_img(img_bg, img)
-        ratio = tool.diff2ratio(diff_img)
-        
+        if not sensor_lock and value[0] != 0xff and value[2] == 0x01:
+            snap(self)
+            sensor_lock = True
+        elif value[0] != 0xff and value[2] == 0x00:
+            sensor_lock = False
 
-        if not light_on and ratio > offset and before_ratio > offset:
-            light_on = True
-            self.serial.write(LIGHT_ON)
-            time.sleep(0.15)
-        if light_on and ratio <= offset and before_ratio <= offset:
-            light_on = False
-            self.serial.write(LIGHT_OFF)
-            time.sleep(0.15)
-            
-        # 조명 켜져있을때만 보내기
-        if light_on and before_light_on and ratio > offset:
-            self.raw_Q.put([img, diff_img])
-
-        before_light_on = light_on
-        before_ratio = ratio
-    
+#######################################################################
+def raw_Q2image_Q(self): # 촬영모드 전용
+    while not self.stop_signal:
+        time.sleep(0.02)
+        
+        if self.raw_Q.empty(): continue
+        self.image_Q.put(self.raw_Q.get())
+        
 #######################################################################
 def read(self):
     try:
         self.poly_detector.update_check()
-        lock = False
 
         while not self.stop_signal:
             time.sleep(0.01)
-            start_time = time.time()
 
             # get image
             if self.raw_Q.empty(): continue
-            img, diff_img = self.raw_Q.get()
-
-            # check center in area
-            diff_polys = tool.find_polys_in_img(diff_img)
-            if diff_polys is None: continue
-            diff_poly = diff_polys[0]
-            diff_center = np.mean(diff_poly, axis=0)
-            size = np.array(diff_img.shape[:2])[::-1] # xy
-            locs = diff_center / size
-            is_center = np.all((self.area_box[0] < locs) & (locs < self.area_box[1]))
-            is_center2 = np.all((self.area_box2[0] < locs) & (locs < self.area_box2[1]))
-
-            if not is_center2: lock = False; continue
-            if lock or not is_center: continue
-            lock = True
+            img = self.raw_Q.get()
 
             # predict
+            start_time = time.time()
             obj_info, dst_polys = self.poly_detector.predict(img)
-
             end_time = time.time()
+            
             logger.info(f"Detect Time : {end_time-start_time:.3f}")
-            self.analy_Q.put([img, obj_info, dst_polys, diff_poly])
+            self.analy_Q.put([img, obj_info, dst_polys])
 
             # save
             self.recode_Q.put([img, 'raw'])
-            if obj_info is None: self.recode_Q.put([diff_img, 'debug'])
             
     except Exception as e:
         logger.error(f"[read]{e}")
@@ -160,6 +81,12 @@ def read(self):
         self.stop_signal = True
 
 #######################################################################
+def turn_off(self, data, n_time):
+    time.sleep(n_time)
+    self.thr_lock.acquire()
+    self.serial.write(data)
+    self.thr_lock.release()
+
 def analysis(self):
     try:
         while not self.stop_signal:
@@ -167,21 +94,21 @@ def analysis(self):
 
             # get img, detect
             if self.analy_Q.empty(): continue
-            img, obj_info, dst_polys, diff_poly = self.analy_Q.get()
+            img, obj_info, dst_polys = self.analy_Q.get()
             
-            # get iou
-            if obj_info is not None:
-                i = obj_info.labels.index("object")
-                poly1 = Polygon(dst_polys[i])
-                poly2 = Polygon(diff_poly)
-                iou = poly1.intersection(poly2).area / poly1.union(poly2).area
-                if iou < 0.7: obj_info, dst_polys = None, None
-            
-            poly = dst_polys[obj_info.labels.index("object")] if obj_info else diff_poly
+            # alram
+            if obj_info is None:
+                self.thr_lock.acquire()
+                self.serial.write(BYTES_DIC["red_on"])
+                self.thr_lock.release()
+                # turn off alram after 0.2s
+                Thread(target=turn_off, args=(self, BYTES_DIC["red_off"], 0.2), daemon=True).start()
+   
+            poly = dst_polys[obj_info.labels.index("object")] if obj_info else None
             name = obj_info.name if obj_info else None
             
             self.data_Q.put(name)
-            self.draw_Q.put([img.copy(), name, poly, diff_poly])
+            self.draw_Q.put([img.copy(), name, poly])
         
     except Exception as e:
         logger.error(f"[analysis]{e}")
@@ -192,13 +119,11 @@ def analysis(self):
 def draw(self):
     fc = lambda x,y:np.random.randint(x,y)
     colors = [(fc(50,255), fc(50,255), fc(0,150)) for _ in range(len(self.poly_detector.names))]
-    # colors = list(map(lambda x:tuple(map(int,x)), np.random.randint(0, 255, size=(4,3))))
     color_dic = dict(zip(self.poly_detector.names, colors))
     # font = cv2.FONT_HERSHEY_SIMPLEX
     font = ImageFont.truetype(FONT_PATH, 40)
     
     # img_shape = np.array(self.cam.img_shape[:2])[::-1] # xy
-    # real_area_box = (self.area_box * img_shape).astype(np.int32)
     
     try:
         while not self.stop_signal:
@@ -206,15 +131,15 @@ def draw(self):
 
             # get img, names, marker, polys
             if self.draw_Q.empty(): continue
-            img, name, poly, diff_poly = self.draw_Q.get()
-            poly = poly.astype(np.int32)
+            img, name, poly = self.draw_Q.get()
+            if poly is not None:
+                poly = poly.astype(np.int32)
 
             # draw area box # cv2에서는 BGR이지만 카메라로 촬영한 이미지이기 때문에 (255,0,0) -> Red
             # cv2.rectangle(img, real_area_box[0], real_area_box[1], (255,0,0), 3)
 
             # draw poly
             color = color_dic[name] if name else (255,255,0)
-            cv2.polylines(img, [diff_poly], True, (255,255,255), thickness=5)
             cv2.polylines(img, [poly], True, color, thickness=5)
             if name is None:
                 self.image_Q.put(img)
@@ -222,10 +147,10 @@ def draw(self):
                 continue
 
             # draw points
-            cv2.putText(img, '1', poly[0], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-            cv2.putText(img, '2', poly[1], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-            cv2.putText(img, '3', poly[2], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
-            cv2.putText(img, '4', poly[3], cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=1, color=(255,0,255))
+            cv2.putText(img, '1', poly[0], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
+            cv2.putText(img, '2', poly[1], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
+            cv2.putText(img, '3', poly[2], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
+            cv2.putText(img, '4', poly[3], cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, thickness=2, color=(255,0,255))
 
             # draw name
             x,y = poly[0]
@@ -243,57 +168,41 @@ def draw(self):
         self.write_sys_msg(e)
         self.stop_signal = True
 
-#######################################################################
-def snap(self):
-    self.serial.write(LIGHT_ON)
-    time.sleep(0.2)
-    self.cam.set_exposure(2500)
-    img = self.cam.get_image()
-    self.serial.write(LIGHT_OFF)
-    self.image_Q.put(img)
 
 #######################################################################
 def train(self):
-    lock = False
     font = cv2.FONT_HERSHEY_SIMPLEX
+    kernel = np.ones((3,3))
+    
     while not self.stop_signal:
         time.sleep(0.01)
 
         # get image
         if self.raw_Q.empty(): continue
-        img, diff_img = self.raw_Q.get()
+        img = self.raw_Q.get()
         img_copy = img.copy()
         
-        
-        diff_polys = tool.find_polys_in_img(diff_img)
-        if diff_polys is None: continue
-        
-        diff_poly = diff_polys[0]
-        
-        # check center in area
-        diff_center = np.mean(diff_poly, axis=0)
-        size = np.array(diff_img.shape[:2])[::-1] # xy
-        locs = diff_center / size
-        is_center = np.all((self.area_box[0] < locs) & (locs < self.area_box[1]))
-        is_center2 = np.all((self.area_box2[0] < locs) & (locs < self.area_box2[1]))
-
-        if not is_center2: lock = False; continue
-        if lock or not is_center: continue
-        lock = True
-            
+        # 이미지에서 제품 Polygon 따기
+        img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        img_mask = cv2.inRange(img_hsv, (0, 0, 60), (360, 255, 255))
+        img_mask = cv2.erode(img_mask, kernel, iterations=3)
+        img_mask = cv2.dilate(img_mask, kernel, iterations=3)
+        self.recode_Q.put([img_mask, 'debug']) # debug save
+        polys = tool.find_polys_in_img(img_mask)
+        if polys is None:
+            self.write_sys_msg(f"이미지 인식 실패. 다시 시도해주세요.")
+            continue
+        poly = polys[0]
+                    
         # 그리기
-        clock_poly = tool.poly2clock(diff_poly)
+        clock_poly = tool.poly2clock(poly)
         cv2.polylines(img_copy, [clock_poly], True, (255,255,255), thickness=5)
-        cv2.putText(img_copy, '1', clock_poly[0], font, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img_copy, '2', clock_poly[1], font, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img_copy, '3', clock_poly[2], font, fontScale=1, thickness=1, color=(255,0,255))
-        cv2.putText(img_copy, '4', clock_poly[3], font, fontScale=1, thickness=1, color=(255,0,255))
+        cv2.putText(img_copy, '1', clock_poly[0], font, fontScale=2, thickness=2, color=(255,0,255))
+        cv2.putText(img_copy, '2', clock_poly[1], font, fontScale=2, thickness=2, color=(255,0,255))
+        cv2.putText(img_copy, '3', clock_poly[2], font, fontScale=2, thickness=2, color=(255,0,255))
+        cv2.putText(img_copy, '4', clock_poly[3], font, fontScale=2, thickness=2, color=(255,0,255))
         
-        
-        
-        # diff_img = cv2.merge([diff_img, diff_img, diff_img])
-        # new_img = np.hstack([img_copy, diff_img])
-        
+                
         self.pair_Q.put([img, clock_poly])
         self.image_Q.put(img_copy)
         
