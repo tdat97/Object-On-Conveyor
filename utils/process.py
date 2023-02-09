@@ -1,17 +1,14 @@
 from utils.logger import logger
 from utils.text import *
-from utils import tool, device
+from utils import tool
 from collections import defaultdict
-from shapely.geometry import Polygon
-from PIL import ImageFont, ImageDraw, Image
+# from shapely.geometry import Polygon
+from PIL import ImageFont, ImageDraw, Image, ImageTk
 from threading import Thread, Lock
 import numpy as np
 import time
 import cv2
 import os
-
-from PIL import ImageTk, Image
-
 
 #######################################################################
 def snap(self):

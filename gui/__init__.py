@@ -240,5 +240,5 @@ def configure(self):
     # 프레임2 - 프레임5 - 라벨
     self.msg_label = tk.Label(self.system_frame, text='')
     self.msg_label.place(relx=0.0, rely=0.3, relwidth=1, relheight=0.7)
-    self.msg_label['font'] = font.Font(family='Helvetica', size=int(10*self.fsize_factor), weight='bold')
+    self.msg_label['font'] = font.Font(family='Helvetica', size=int(15*self.fsize_factor), weight='bold')
     self.msg_label.configure(fg='#000', bg='#fff', anchor='w', justify='left', padx=30)

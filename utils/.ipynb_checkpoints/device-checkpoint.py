@@ -7,7 +7,7 @@ import serial
 
 def get_cam(exposure_time, logger=None):
     try:
-        cam = BaslerCam(ExposureTime=exposure_time)
+        cam = BaslerCam(ExposureTime=exposure_time, logger=logger)
         for _ in range(3): cam.get_image()
         return cam, None
     except Exception as e:
@@ -21,7 +21,7 @@ def get_serial(port):
         my_serial.write(b"\xB0\x00\x00\xB0")
         value = my_serial.read(4)
         
-        if value[0] != 0xc0:
+        if not value or value[0] != 0xc0:
             raise Exception("Make sure to connect serial.")
             
         return my_serial, None

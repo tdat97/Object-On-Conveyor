@@ -153,6 +153,7 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         tool.clear_Q(self.data_Q)
         tool.clear_Q(self.recode_Q)
+        tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=gthr.data_eater, args=(self,), daemon=True).start()
@@ -196,6 +197,7 @@ class VisualControl():
     def snap_mode_thread(self):
         tool.clear_Q(self.raw_Q)
         tool.clear_Q(self.image_Q)
+        tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=process.raw_Q2image_Q, args=(self,), daemon=True).start()
@@ -247,6 +249,7 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         tool.clear_Q(self.pair_Q)
         tool.clear_Q(self.enter_Q)
+        tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=process.snaper, args=(self,), daemon=True).start()

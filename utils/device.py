@@ -21,7 +21,7 @@ def get_serial(port):
         my_serial.write(b"\xB0\x00\x00\xB0")
         value = my_serial.read(4)
         
-        if value[0] != 0xc0:
+        if not value or value[0] != 0xc0:
             raise Exception("Make sure to connect serial.")
             
         return my_serial, None
