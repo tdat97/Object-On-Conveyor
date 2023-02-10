@@ -151,7 +151,7 @@ class MultiPolyDetector():
         self.update_check()
         
         # warm up
-        temp = tool.imread("./temp/apple.jpg")
+        temp = np.zeros((100,100,3), dtype=np.uint8)# tool.imread("./temp/apple.jpg")
         if temp is None: return
         _, _ = self.predict(temp)
         

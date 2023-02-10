@@ -1,7 +1,7 @@
 
 # window
 TITLE = "Machine Vision System"
-ICON_PATH = "./gui/eye.ico"
+ICON_PATH = "./source/eye.ico"
 
 # source
 IMG_DIR_PATH = "./source/img"
