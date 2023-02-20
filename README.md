@@ -47,6 +47,11 @@ train-mode : one-shot, one-object-registration
 ##### The Read-Mode screen
 ![OOC](https://user-images.githubusercontent.com/48349693/217760413-717d983a-8cee-48a7-a671-35f5a004b5d0.png)
 
+
+##### The Train-Mode Example
+![small_one_shot](https://user-images.githubusercontent.com/48349693/220032335-a3114b9a-4fef-40c5-bc2c-688f7d6316d3.gif)
+
+
 ---
 
 ##### Circuit Wiring
