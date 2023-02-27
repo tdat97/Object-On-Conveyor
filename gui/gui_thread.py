@@ -17,8 +17,7 @@ def device_check(self):
         self.write_sys_msg("Cam Started.")
 
     # Load Serial
-    # self.serial, err = device.get_serial(SERIAL_PORT, self.cam) if self.cam else (None, err)
-    self.serial, err = device.get_serial(SERIAL_PORT)
+    self.serial, err = True, None# device.get_serial(SERIAL_PORT)
     if self.serial:
         logger.info("Serial opened.")
         self.write_sys_msg("Serial opened.")

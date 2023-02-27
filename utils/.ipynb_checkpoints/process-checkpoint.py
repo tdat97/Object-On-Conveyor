@@ -1,31 +1,28 @@
 from utils.logger import logger
 from utils.text import *
-from utils import tool, device
+from utils import tool
 from collections import defaultdict
-from shapely.geometry import Polygon
-from PIL import ImageFont, ImageDraw, Image
+# from shapely.geometry import Polygon
+from PIL import ImageFont, ImageDraw, Image, ImageTk
 from threading import Thread, Lock
 import numpy as np
 import time
 import cv2
 import os
 
-from PIL import ImageTk, Image
-
-
 #######################################################################
 def snap(self):
-    self.thr_lock.acquire()
-    self.serial.write(BYTES_DIC["light_on"])
-    self.thr_lock.release()
+#     self.thr_lock.acquire()
+#     self.serial.write(BYTES_DIC["light_on"])
+#     self.thr_lock.release()
     
-    time.sleep(0.07)
+#     time.sleep(0.07)
     # self.cam.set_exposure(2500)
     img = self.cam.get_image()
     
-    self.thr_lock.acquire()
-    self.serial.write(BYTES_DIC["light_off"])
-    self.thr_lock.release()
+#     self.thr_lock.acquire()
+#     self.serial.write(BYTES_DIC["light_off"])
+#     self.thr_lock.release()
     
     self.raw_Q.put(img)
     
@@ -100,12 +97,12 @@ def analysis(self):
             img, obj_info, dst_polys = self.analy_Q.get()
             
             # alram
-            if obj_info is None:
-                self.thr_lock.acquire()
-                self.serial.write(BYTES_DIC["red_on"])
-                self.thr_lock.release()
-                # turn off alram after 0.2s
-                Thread(target=turn_off, args=(self, BYTES_DIC["red_off"], 0.2), daemon=True).start()
+            # if obj_info is None:
+            #     self.thr_lock.acquire()
+            #     self.serial.write(BYTES_DIC["red_on"])
+            #     self.thr_lock.release()
+            #     # turn off alram after 0.2s
+            #     Thread(target=turn_off, args=(self, BYTES_DIC["red_off"], 0.2), daemon=True).start()
    
             poly = dst_polys[obj_info.labels.index("object")] if obj_info else None
             name = obj_info.name if obj_info else None

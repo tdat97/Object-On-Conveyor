@@ -1,7 +1,7 @@
 
 # window
 TITLE = "Machine Vision System"
-ICON_PATH = "./gui/eye.ico"
+ICON_PATH = "./source/eye.ico"
 
 # source
 IMG_DIR_PATH = "./source/img"
@@ -32,7 +32,7 @@ BYTES_DIC = {"light_on"   : bytes([0xA0, 0x00, 0x01, 0xA0 ^ 0x00 ^ 0x01]),
 # ex) 0xFF 0x00 0x00 0xFF -> Incorrect validation.
 
 # Cam
-EXPOSURE_TIME = 1000
+EXPOSURE_TIME = 10000
 
 # Font
 FONT_PATH = "./source/NanumGothic.ttf"

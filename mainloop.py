@@ -153,11 +153,11 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         tool.clear_Q(self.data_Q)
         tool.clear_Q(self.recode_Q)
-        tool.clear_serial(self.serial)
+        # tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=gthr.data_eater, args=(self,), daemon=True).start()
-        Thread(target=process.snaper, args=(self,), daemon=True).start()
+        # Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.read, args=(self,), daemon=True).start()
         Thread(target=process.analysis, args=(self,), daemon=True).start()
         Thread(target=process.draw, args=(self,), daemon=True).start()
@@ -168,16 +168,16 @@ class VisualControl():
         self.button3.configure(text="", command=lambda:time.sleep(0.1))
         time.sleep(0.3)
         self.button1.configure(text="중지", command=self.stop)
-        self.button2.configure(text="", command=lambda:time.sleep(0.1))
+        self.button2.configure(text="촬영", command=lambda:process.snap(self))
         self.button3.configure(text="", command=lambda:time.sleep(0.1))
         
         self.write_sys_msg("판독모드 시작!")
         
         while not self.stop_signal: time.sleep(0.01)
         self.object_names = None
-        self.thr_lock.acquire()
-        self.serial.write(BYTES_DIC["light_off"])
-        self.thr_lock.release()
+        # self.thr_lock.acquire()
+        # self.serial.write(BYTES_DIC["light_off"])
+        # self.thr_lock.release()
         self.init_button_()
         self.ok_label.configure(text='NONE', fg='#ff0', bg='#333', anchor='center')
         self.objinfo.configure(text="")
@@ -197,7 +197,7 @@ class VisualControl():
     def snap_mode_thread(self):
         tool.clear_Q(self.raw_Q)
         tool.clear_Q(self.image_Q)
-        tool.clear_serial(self.serial)
+        # tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
         Thread(target=process.raw_Q2image_Q, args=(self,), daemon=True).start()
@@ -214,9 +214,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.init_button_()
-        self.thr_lock.acquire()
-        self.serial.write(BYTES_DIC["light_off"])
-        self.thr_lock.release()
+        # self.thr_lock.acquire()
+        # self.serial.write(BYTES_DIC["light_off"])
+        # self.thr_lock.release()
     
     def save(self):
         logger.info("Save button clicked.")
@@ -249,10 +249,10 @@ class VisualControl():
         tool.clear_Q(self.image_Q)
         tool.clear_Q(self.pair_Q)
         tool.clear_Q(self.enter_Q)
-        tool.clear_serial(self.serial)
+        # tool.clear_serial(self.serial)
         
         Thread(target=gthr.image_eater, args=(self,), daemon=True).start()
-        Thread(target=process.snaper, args=(self,), daemon=True).start()
+        # Thread(target=process.snaper, args=(self,), daemon=True).start()
         Thread(target=process.train, args=(self,), daemon=True).start()
         Thread(target=process.json_saver, args=(self,), daemon=True).start()
         Thread(target=process.recode, args=(self,), daemon=True).start()
@@ -263,7 +263,7 @@ class VisualControl():
         self.button3.configure(text="", command=lambda:time.sleep(0.1))
         time.sleep(0.3)
         self.button1.configure(text="중지", command=self.stop)
-        self.button2.configure(text="", command=lambda:time.sleep(0.1))
+        self.button2.configure(text="촬영", command=lambda:process.snap(self))
         self.button3.configure(text="", command=lambda:time.sleep(0.1))
 
         self.write_sys_msg("학습모드 시작!")
@@ -276,9 +276,9 @@ class VisualControl():
         
         while not self.stop_signal: time.sleep(0.01)
         self.init_button_()
-        self.thr_lock.acquire()
-        self.serial.write(BYTES_DIC["light_off"])
-        self.thr_lock.release()
+        # self.thr_lock.acquire()
+        # self.serial.write(BYTES_DIC["light_off"])
+        # self.thr_lock.release()
         
         # 입력칸 부분에 OK,NG
         self.input_name.place_forget()

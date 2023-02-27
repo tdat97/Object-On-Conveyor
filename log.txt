@@ -1,0 +1,77 @@
+2023-02-20 14:55:34,946 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:55:34,946 - root - INFO - Exposure Time : 1000.0
+2023-02-20 14:55:34,946 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:55:34,983 - root - INFO - Cam Started.
+2023-02-20 14:55:34,983 - root - INFO - Serial opened.
+2023-02-20 14:55:37,568 - root - INFO - SnapMode button clicked.
+2023-02-20 14:55:41,386 - root - INFO - Stop button clicked.
+2023-02-20 14:55:54,002 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:55:54,004 - root - INFO - Exposure Time : 20000.0
+2023-02-20 14:55:54,004 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:55:54,051 - root - INFO - Cam Started.
+2023-02-20 14:55:54,052 - root - INFO - Serial opened.
+2023-02-20 14:55:55,120 - root - INFO - SnapMode button clicked.
+2023-02-20 14:56:07,372 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:56:07,372 - root - INFO - Exposure Time : 15000.0
+2023-02-20 14:56:07,373 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:56:07,428 - root - INFO - Cam Started.
+2023-02-20 14:56:07,429 - root - INFO - Serial opened.
+2023-02-20 14:56:08,312 - root - INFO - SnapMode button clicked.
+2023-02-20 14:56:17,736 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:56:17,737 - root - INFO - Exposure Time : 10000.0
+2023-02-20 14:56:17,738 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:56:17,778 - root - INFO - Cam Started.
+2023-02-20 14:56:17,779 - root - INFO - Serial opened.
+2023-02-20 14:56:18,408 - root - INFO - SnapMode button clicked.
+2023-02-20 14:56:21,600 - root - INFO - Stop button clicked.
+2023-02-20 14:56:23,120 - root - INFO - read_mode button clicked.
+2023-02-20 14:56:24,757 - root - DEBUG - Best Acc : 1.60% 	 Best_Obj : ObjInfo(초코파이)
+2023-02-20 14:56:24,758 - root - INFO - Detect Time : 0.038
+2023-02-20 14:56:24,767 - root - ERROR - [analysis]'bool' object has no attribute 'write'
+2023-02-20 14:57:57,470 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:57:57,470 - root - INFO - Exposure Time : 10000.0
+2023-02-20 14:57:57,471 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:57:57,507 - root - INFO - Cam Started.
+2023-02-20 14:57:57,508 - root - INFO - Serial opened.
+2023-02-20 14:57:58,781 - root - INFO - read_mode button clicked.
+2023-02-20 14:58:00,161 - root - DEBUG - Best Acc : 1.35% 	 Best_Obj : ObjInfo(초코파이)
+2023-02-20 14:58:00,162 - root - INFO - Detect Time : 0.035
+2023-02-20 14:58:02,545 - root - INFO - Stop button clicked.
+2023-02-20 14:58:18,869 - root - INFO - TrainMode button clicked.
+2023-02-20 14:58:28,549 - root - INFO - Stop button clicked.
+2023-02-20 14:58:29,509 - root - INFO - TrainMode button clicked.
+2023-02-20 14:58:36,923 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:58:36,923 - root - INFO - Exposure Time : 10000.0
+2023-02-20 14:58:36,924 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:58:36,959 - root - INFO - Cam Started.
+2023-02-20 14:58:36,960 - root - INFO - Serial opened.
+2023-02-20 14:58:40,053 - root - INFO - TrainMode button clicked.
+2023-02-20 14:59:06,733 - root - INFO - Stop button clicked.
+2023-02-20 14:59:13,593 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 14:59:13,593 - root - INFO - Exposure Time : 10000.0
+2023-02-20 14:59:13,595 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 14:59:13,630 - root - INFO - Cam Started.
+2023-02-20 14:59:13,631 - root - INFO - Serial opened.
+2023-02-20 15:01:06,273 - root - INFO - TrainMode button clicked.
+2023-02-20 15:01:31,520 - root - INFO - Camera Name : a2A1920-160ucBAS
+2023-02-20 15:01:31,520 - root - INFO - Exposure Time : 10000.0
+2023-02-20 15:01:31,521 - root - INFO - DeviceLinkThroughputLimit : 360000000
+2023-02-20 15:01:31,556 - root - INFO - Cam Started.
+2023-02-20 15:01:31,557 - root - INFO - Serial opened.
+2023-02-20 15:01:44,530 - root - INFO - TrainMode button clicked.
+2023-02-20 15:02:57,955 - root - INFO - [후렌치파이] applied.
+2023-02-20 15:03:11,122 - root - INFO - Stop button clicked.
+2023-02-20 15:03:17,514 - root - INFO - read_mode button clicked.
+2023-02-20 15:03:23,297 - root - DEBUG - Best Acc : 93.42% 	 Best_Obj : ObjInfo(후렌치파이)
+2023-02-20 15:03:23,298 - root - INFO - Detect Time : 0.018
+2023-02-20 15:03:49,479 - root - DEBUG - Best Acc : 36.29% 	 Best_Obj : ObjInfo(후렌치파이)
+2023-02-20 15:03:49,480 - root - INFO - Detect Time : 0.017
+2023-02-20 15:04:00,695 - root - DEBUG - Best Acc : 39.97% 	 Best_Obj : ObjInfo(후렌치파이)
+2023-02-20 15:04:00,695 - root - INFO - Detect Time : 0.019
+2023-02-20 15:04:12,220 - root - DEBUG - Best Acc : 25.47% 	 Best_Obj : ObjInfo(후렌치파이)
+2023-02-20 15:04:12,220 - root - INFO - Detect Time : 0.017
+2023-02-20 15:04:22,172 - root - DEBUG - Best Acc : 51.66% 	 Best_Obj : ObjInfo(후렌치파이)
+2023-02-20 15:04:22,172 - root - INFO - Detect Time : 0.017
+2023-02-20 15:04:33,250 - root - DEBUG - Best Acc : 60.83% 	 Best_Obj : ObjInfo(후렌치파이)
+2023-02-20 15:04:33,250 - root - INFO - Detect Time : 0.017
+2023-02-20 15:04:43,998 - root - INFO - Stop button clicked.
