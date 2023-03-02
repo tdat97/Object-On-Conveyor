@@ -76,3 +76,9 @@
 2023-02-20 15:04:33,250 - root - INFO - Detect Time : 0.017
 2023-02-20 15:04:43,998 - root - INFO - Stop button clicked.
 2023-02-27 16:43:20,553 - root - INFO - Serial opened.
+2023-02-28 11:27:45,733 - root - INFO - Serial opened.
+2023-02-28 17:06:52,187 - root - INFO - Serial opened.
+2023-03-02 09:22:11,795 - root - INFO - Serial opened.
+2023-03-02 09:24:14,384 - root - INFO - Serial opened.
+2023-03-02 09:29:48,702 - root - INFO - Serial opened.
+2023-03-02 09:32:25,884 - root - INFO - Serial opened.
