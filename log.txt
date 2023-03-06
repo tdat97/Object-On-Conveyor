@@ -82,3 +82,4 @@
 2023-03-02 09:24:14,384 - root - INFO - Serial opened.
 2023-03-02 09:29:48,702 - root - INFO - Serial opened.
 2023-03-02 09:32:25,884 - root - INFO - Serial opened.
+2023-03-02 12:19:06,696 - root - INFO - Serial opened.
